@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package calculator;
+
+option go_package = "github.com/cont1nu1ty/distributed-systems-go-demos/api/proto/calculator";
+
+// CalculatorService provides basic arithmetic operations
+service CalculatorService {
+  // Add adds two numbers
+  rpc Add(BinaryOperation) returns (Result);
+  
+  // Multiply multiplies two numbers
+  rpc Multiply(BinaryOperation) returns (Result);
+  
+  // Subtract subtracts b from a
+  rpc Subtract(BinaryOperation) returns (Result);
+  
+  // Divide divides a by b
+  rpc Divide(BinaryOperation) returns (Result);
+}
+
+// BinaryOperation represents an operation on two numbers
+message BinaryOperation {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+// Result represents the result of an operation
+message Result {
+  int32 value = 1;
+}
