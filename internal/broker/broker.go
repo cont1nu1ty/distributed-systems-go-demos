@@ -16,11 +16,11 @@ type Message struct {
 
 // Broker is an in-memory pub/sub message broker
 type Broker struct {
-	mu           sync.RWMutex
-	subscribers  map[string][]chan Message
-	subCounter   int
-	closed       bool
-	closeChan    chan struct{}
+	mu          sync.RWMutex
+	subscribers map[string][]chan Message
+	subCounter  int
+	closed      bool
+	closeChan   chan struct{}
 }
 
 // NewBroker creates a new message broker
@@ -42,12 +42,12 @@ func (b *Broker) Subscribe(topic string) (<-chan Message, error) {
 
 	// Create a buffered channel for the subscriber
 	ch := make(chan Message, 100)
-	
+
 	b.subscribers[topic] = append(b.subscribers[topic], ch)
 	b.subCounter++
-	
+
 	log.Printf("New subscriber for topic '%s' (total subscribers: %d)", topic, len(b.subscribers[topic]))
-	
+
 	return ch, nil
 }
 
@@ -97,9 +97,12 @@ func (b *Broker) Unsubscribe(topic string, ch <-chan Message) {
 	subscribers := b.subscribers[topic]
 	for i, subCh := range subscribers {
 		if subCh == ch {
-			// Remove from slice
+			// Remove from slice first to avoid race condition
 			b.subscribers[topic] = append(subscribers[:i], subscribers[i+1:]...)
-			close(subCh)
+			// Close after removing from list to prevent panic
+			go func() {
+				close(subCh)
+			}()
 			log.Printf("Unsubscribed from topic '%s'", topic)
 			break
 		}

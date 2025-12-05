@@ -19,11 +19,11 @@ func ReadJSON(conn net.Conn, v interface{}) error {
 		}
 		return fmt.Errorf("read error: %w", err)
 	}
-	
+
 	if err := json.Unmarshal(line, v); err != nil {
 		return fmt.Errorf("json unmarshal error: %w", err)
 	}
-	
+
 	return nil
 }
 
@@ -34,12 +34,12 @@ func WriteJSON(conn net.Conn, v interface{}) error {
 	if err != nil {
 		return fmt.Errorf("json marshal error: %w", err)
 	}
-	
+
 	data = append(data, '\n')
 	_, err = conn.Write(data)
 	if err != nil {
 		return fmt.Errorf("write error: %w", err)
 	}
-	
+
 	return nil
 }

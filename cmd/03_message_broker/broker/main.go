@@ -17,7 +17,7 @@ const (
 
 // Command represents a broker command
 type Command struct {
-	Action  string      `json:"action"`  // "subscribe", "publish"
+	Action  string      `json:"action"` // "subscribe", "publish"
 	Topic   string      `json:"topic"`
 	Payload interface{} `json:"payload,omitempty"`
 }
@@ -38,12 +38,12 @@ func NewBrokerServer() *BrokerServer {
 // handleConnection handles a client connection
 func (bs *BrokerServer) handleConnection(conn net.Conn) {
 	defer conn.Close()
-	
+
 	log.Printf("New connection from %s", conn.RemoteAddr())
-	
+
 	decoder := json.NewDecoder(conn)
 	encoder := json.NewEncoder(conn)
-	
+
 	for {
 		var cmd Command
 		if err := decoder.Decode(&cmd); err != nil {
@@ -52,14 +52,14 @@ func (bs *BrokerServer) handleConnection(conn net.Conn) {
 			}
 			return
 		}
-		
+
 		log.Printf("Received command: %s on topic '%s'", cmd.Action, cmd.Topic)
-		
+
 		switch cmd.Action {
 		case "subscribe":
 			bs.handleSubscribe(conn, cmd.Topic, encoder)
 			return // Subscription is long-lived, exit after handling
-			
+
 		case "publish":
 			if err := bs.broker.Publish(cmd.Topic, cmd.Payload); err != nil {
 				response := map[string]string{"status": "error", "message": err.Error()}
@@ -68,7 +68,7 @@ func (bs *BrokerServer) handleConnection(conn net.Conn) {
 				response := map[string]string{"status": "ok"}
 				encoder.Encode(response)
 			}
-			
+
 		default:
 			response := map[string]string{"status": "error", "message": "unknown action"}
 			encoder.Encode(response)
@@ -84,15 +84,15 @@ func (bs *BrokerServer) handleSubscribe(conn net.Conn, topic string, encoder *js
 		encoder.Encode(response)
 		return
 	}
-	
+
 	// Send acknowledgment
 	response := map[string]string{"status": "subscribed"}
 	if err := encoder.Encode(response); err != nil {
 		return
 	}
-	
+
 	log.Printf("Client subscribed to topic '%s'", topic)
-	
+
 	// Stream messages to client
 	for msg := range msgChan {
 		if err := encoder.Encode(msg); err != nil {
@@ -100,7 +100,7 @@ func (bs *BrokerServer) handleSubscribe(conn net.Conn, topic string, encoder *js
 			return
 		}
 	}
-	
+
 	log.Printf("Subscription ended for topic '%s'", topic)
 }
 
@@ -111,24 +111,24 @@ func (bs *BrokerServer) Start() error {
 		return fmt.Errorf("failed to listen: %w", err)
 	}
 	defer listener.Close()
-	
+
 	log.Printf("Message Broker Server listening on %s", Port)
 	log.Println("Waiting for connections...")
-	
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Printf("Accept error: %v", err)
 			continue
 		}
-		
+
 		go bs.handleConnection(conn)
 	}
 }
 
 func main() {
 	log.Println("Message Broker Server starting...")
-	
+
 	server := NewBrokerServer()
 	if err := server.Start(); err != nil {
 		log.Fatalf("Server error: %v", err)

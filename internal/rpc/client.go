@@ -48,7 +48,7 @@ func (c *Client) Call(service, method string, params ...interface{}) (interface{
 
 	// Generate request ID
 	reqID := fmt.Sprintf("%s-%s-%d", service, method, time.Now().UnixNano())
-	
+
 	// Create response channel
 	respChan := make(chan *Response, 1)
 	c.pending[reqID] = respChan

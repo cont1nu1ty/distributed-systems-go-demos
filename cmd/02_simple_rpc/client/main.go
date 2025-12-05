@@ -54,7 +54,7 @@ func main() {
 		wg.Add(1)
 		go func(id int, method string, a, b int) {
 			defer wg.Done()
-			
+
 			result, err := client.Call("CalculatorService", method, a, b)
 			if err != nil {
 				log.Printf("[Request %d] %s(%d, %d) failed: %v", id, method, a, b, err)

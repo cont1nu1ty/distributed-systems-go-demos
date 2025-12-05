@@ -56,7 +56,7 @@ func (s *Server) HandleConnection(conn net.Conn) {
 
 		// Process request
 		result, err := s.invoke(req.Service, req.Method, req.Params)
-		
+
 		resp := Response{
 			ID: req.ID,
 		}
@@ -93,7 +93,7 @@ func (s *Server) invoke(serviceName, methodName string, params []interface{}) (i
 
 	// Get service value
 	serviceValue := reflect.ValueOf(service)
-	
+
 	// Get method
 	method := serviceValue.MethodByName(methodName)
 	if !method.IsValid() {
@@ -110,7 +110,7 @@ func (s *Server) invoke(serviceName, methodName string, params []interface{}) (i
 	for i, param := range params {
 		// Convert JSON numbers to proper types
 		paramType := methodType.In(i)
-		
+
 		switch paramType.Kind() {
 		case reflect.Int:
 			// JSON unmarshals numbers as float64
@@ -147,14 +147,16 @@ func (s *Server) sendError(conn net.Conn, id, errMsg string) {
 		ID:    id,
 		Error: errMsg,
 	}
-	
+
 	respData, err := EncodeResponse(resp)
 	if err != nil {
 		log.Printf("Failed to encode error response: %v", err)
 		return
 	}
 
-	conn.Write(respData)
+	if _, err := conn.Write(respData); err != nil {
+		log.Printf("Failed to write error response: %v", err)
+	}
 }
 
 // Serve starts the RPC server

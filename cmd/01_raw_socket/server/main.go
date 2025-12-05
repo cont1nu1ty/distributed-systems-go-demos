@@ -16,11 +16,11 @@ const (
 
 // Request represents an incoming request
 type Request struct {
-	ID        string        `json:"id"`
-	Service   string        `json:"service"`
-	Method    string        `json:"method"`
-	Params    []int         `json:"params"`
-	TimeoutMS int           `json:"timeout_ms"`
+	ID        string `json:"id"`
+	Service   string `json:"service"`
+	Method    string `json:"method"`
+	Params    []int  `json:"params"`
+	TimeoutMS int    `json:"timeout_ms"`
 }
 
 // Response represents an outgoing response
